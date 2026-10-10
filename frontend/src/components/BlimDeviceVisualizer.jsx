@@ -1,20 +1,28 @@
 import React, { Suspense, useMemo, memo, useState } from 'react';
-import { Canvas, useLoader } from '@react-three/fiber';
-import { STLLoader } from 'three/examples/jsm/loaders/STLLoader';
-import { OrbitControls, Stage, Html } from '@react-three/drei';
-import { Box, RotateCw, ZoomIn, Move, Map as MapIcon, Eye, EyeOff } from 'lucide-react';
+import { Canvas } from '@react-three/fiber';
+import {
+  OrbitControls,
+  Html,
+  useGLTF,
+  Environment,
+  Center,
+  ContactShadows,
+  Stage,
+} from '@react-three/drei';
+import { Box, Eye, EyeOff, Map as MapIcon } from 'lucide-react';
 import { ErrorBoundary } from 'react-error-boundary';
 import Map from './Map';
 
 function Model({ url }) {
-  const geometry = useLoader(STLLoader, url);
+  const { scene } = useGLTF(url);
+
   return (
-    <mesh geometry={geometry} castShadow receiveShadow rotation={[0, 0, Math.PI / 2]}>
-      <meshStandardMaterial color="#dfdfdfff" roughness={0.5} metalness={0.5} />
-    </mesh>
+    <Center>
+      <primitive object={scene} scale={1.2} />
+    </Center>
   );
 }
-
+useGLTF.preload('/blim-robot-v2.glb');
 function Loader() {
   return (
     <Html center>
@@ -36,8 +44,7 @@ function ErrorFallback({ error }) {
       <Box className="w-12 h-12 mb-2 opacity-50" />
       <h3 className="font-medium text-lg">Failed to load 3D Model</h3>
       <p className="text-sm opacity-80 mt-1">{error.message}</p>
-      <p className="text-xs text-gray-500 mt-4">Please check if /makasih_rio.stl exists in the public folder.</p>
-    </div>
+Please check if /BLIM_quadruped.glb exists in the public folder.    </div>
   );
 }
 
@@ -119,8 +126,10 @@ function DeviceDiagnostics() {
 
 function DeviceLocation() {
   const [showMap, setShowMap] = useState(true);
-  const position = [13.669656, 100.609722];
-  const address = "88 Debaratna Rd, Bang Na Tai, Bang Na, Bangkok 10260, Thailand";
+
+const position = [-6.36313, 106.82873];
+const address = "Balai Serbaguna Purnomo Prawiro, FISIP Universitas Indonesia, Kampus UI Depok, Jawa Barat, Indonesia";
+  
 
   return (
     <div className="bg-white backdrop-blur-sm border-t border-stone-100 p-4 relative">
@@ -164,8 +173,8 @@ function DeviceLocation() {
 
 const BlimDeviceVisualizer = memo(function BlimDeviceVisualizer() {
   // Memoize stable props to prevent Canvas re-renders
-  const cameraSettings = useMemo(() => ({ position: [0, 0, 150], fov: 45 }), []);
-  const dprSettings = useMemo(() => [1, 2], []);
+  const cameraSettings = useMemo(() => ({ position: [0, 2, 8], fov: 35 }), []);
+const dprSettings = useMemo(() => [1, 2], []);
 
   const handleCreated = ({ gl }) => {
     console.log("BlimDeviceVisualizer: Canvas initialized", {
@@ -201,8 +210,7 @@ const BlimDeviceVisualizer = memo(function BlimDeviceVisualizer() {
           >
             <Suspense fallback={<Loader />}>
               <Stage environment="city" intensity={0.5} contactShadow={{ opacity: 0.4, blur: 2 }}>
-                <Model url="/makasih_rio.stl" />
-              </Stage>
+<Model url="/blim-robot-v2.glb" />             </Stage>
             </Suspense>
             <OrbitControls 
               makeDefault 
